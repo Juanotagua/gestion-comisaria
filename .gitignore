@@ -1,0 +1,6 @@
+backend-comisaria/node_modules/
+frontend-comisaria/node_modules/
+
+.env
+dist/
+.vscode/
