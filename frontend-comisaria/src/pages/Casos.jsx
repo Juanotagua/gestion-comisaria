@@ -9,13 +9,14 @@ function Casos() {
   const [seguimiento, setSeguimiento] = useState([])
   const [casoSeleccionado, setCasoSeleccionado] = useState(null)
   const [mostrarModal, setMostrarModal] = useState(false)
+  const usuario = JSON.parse(localStorage.getItem('usuario'))
 
   // 🔹 Obtener casos
-  const obtenerCasos = () => {
-    fetch('http://localhost:3000/api/casos')
-      .then(res => res.json())
-      .then(data => setCasos(data))
-  }
+ const obtenerCasos = () => {
+  fetch(`http://localhost:3000/api/casos?id_usuario=${usuario.id_usuario}&rol=${usuario.nombre_rol}`)
+    .then(res => res.json())
+    .then(data => setCasos(data))
+}
 
   useEffect(() => {
     obtenerCasos()
@@ -85,13 +86,17 @@ function Casos() {
           <p><b>Prioridad:</b> {caso.nombre_prioridad}</p>
           <p>{caso.descripcion_hechos}</p>
 
-          <button onClick={() => asignarCaso(caso.id_caso)}>
-            Asignar
-          </button>
+          {/* 🔐 SOLO COMISARIO */}
+          {usuario?.nombre_rol?.toUpperCase() === 'COMISARIO' && (
+        <button onClick={() => asignarCaso(caso.id_caso)}>
+        Asignar
+        </button>
+)}
 
-          <button onClick={() => verSeguimiento(caso.id_caso)}>
-            Ver seguimiento
-          </button>
+{/*  TODOS pueden ver seguimiento */}
+      <button onClick={() => verSeguimiento(caso.id_caso)}>
+      Ver seguimiento
+      </button>
         </div>
       ))}
 

@@ -2,37 +2,43 @@ const router = require('express').Router();
 const pool = require('../db/conexion');
 
 router.post('/login', async (req, res) => {
+  try {
 
-try{
+    const { correo, password } = req.body;
 
-const { correo, password } = req.body;
+    const resultado = await pool.query(`
+      SELECT 
+        u.id_usuario,
+        u.nombre,
+        u.correo,
+        u.password_hash,
+        u.id_rol,
+        r.nombre_rol
+      FROM usuarios u
+      JOIN catalogo_roles_usuario r 
+        ON u.id_rol = r.id_rol
+      WHERE u.correo = $1
+    `, [correo]);
 
-const resultado = await pool.query(
-'SELECT * FROM usuarios WHERE correo = $1',
-[correo]
-);
+    if (resultado.rows.length === 0) {
+      return res.status(401).json({ error: 'Usuario no existe' });
+    }
 
-if(resultado.rows.length === 0){
-return res.status(401).json({ error: 'Usuario no existe' });
-}
+    const usuario = resultado.rows[0];
 
-const usuario = resultado.rows[0];
+    if (usuario.password_hash !== password) {
+      return res.status(401).json({ error: 'Contraseña incorrecta' });
+    }
 
-// ⚠️ por ahora sin bcrypt (luego lo metemos)
-if(usuario.password_hash !== password){
-return res.status(401).json({ error: 'Contraseña incorrecta' });
-}
+    res.json({
+      mensaje: 'Login correcto',
+      usuario
+    });
 
-res.json({
-mensaje:'Login correcto',
-usuario
-});
-
-}catch(error){
-console.error(error);
-res.status(500).json({ error:'Error servidor' });
-}
-
+  } catch (error) {
+    console.error("🔥 ERROR LOGIN:", error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 module.exports = router;

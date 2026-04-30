@@ -1,47 +1,66 @@
 import { useNavigate } from 'react-router-dom'
 
 function Sidebar() {
+
   const navigate = useNavigate()
 
   return (
-    <div style={{
-      width: '220px',
-      height: '100vh',
-      background: '#0f172a',
-      color: 'white',
-      padding: '20px'
-    }}>
+    <div style={sidebar}>
 
-      <h2>Comisaría</h2>
-      <hr />
+      <h2 style={logo}>Comisaría</h2>
 
-      <p style={itemStyle} onClick={() => navigate('/dashboard')}>
-        📊 Dashboard
-      </p>
+      <div style={menu}>
 
-      <p style={itemStyle} onClick={() => navigate('/casos')}>
-        📁 Casos
-      </p>
+        <div style={item} onClick={() => navigate('/dashboard')}>
+          📊 Dashboard
+        </div>
 
-      <p style={itemStyle}>
-        👥 Usuarios
-      </p>
+        <div style={item} onClick={() => navigate('/casos')}>
+          📂 Casos
+        </div>
 
-      <p style={itemStyle}>
-        📈 Reportes
-      </p>
+        <div style={item} onClick={() => navigate('/usuarios')}>
+          👥 Usuarios
+        </div>
 
-      <p style={itemStyle}>
-        🔔 Notificaciones
-      </p>
+        <div style={item} onClick={() => navigate('/crear-caso')}>
+          ➕ Crear Caso
+        </div>
+
+        <div style={item} onClick={() => navigate('/reportes')}>
+          📈 Estadísticas
+        </div>
+
+      </div>
 
     </div>
   )
 }
 
-const itemStyle = {
+// 🎨 estilos
+const sidebar = {
+  width: '220px',
+  background: '#0f172a',
+  color: 'white',
+  padding: '20px',
+  height: '100vh'
+}
+
+const logo = {
+  marginBottom: '30px'
+}
+
+const menu = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '15px'
+}
+
+const item = {
   cursor: 'pointer',
-  margin: '15px 0'
+  padding: '10px',
+  borderRadius: '6px',
+  transition: '0.2s'
 }
 
 export default Sidebar

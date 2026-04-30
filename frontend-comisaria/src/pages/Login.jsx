@@ -16,9 +16,9 @@ try{
 
 const res = await login(correo, password)
 
-console.log(res)
+// 🔥 guarda usuario
+localStorage.setItem('usuario', JSON.stringify(res.usuario))
 
-// si login es correcto
 navigate('/dashboard')
 
 }catch(err){

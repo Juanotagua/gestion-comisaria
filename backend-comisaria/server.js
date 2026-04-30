@@ -12,7 +12,8 @@ app.use('/api/auth', require('./routes/auth'))
 app.use('/api/casos', require('./routes/casos'))
 app.use('/api/dashboard', require('./routes/dashboard')) 
 app.use('/api/seguimiento', require('./routes/seguimiento'))
-
+app.use('/api/catalogos', require('./routes/catalogos'))
+app.use('/api/usuarios', require('./routes/usuarios'))
 // servidor
 app.listen(3000, () => {
   console.log('Servidor corriendo en puerto 3000')

@@ -4,17 +4,18 @@ import Casos from './pages/Casos'
 import Login from './pages/Login'
 import Layout from './components/Layout'
 import CrearCaso from './pages/CrearCaso'
+import Usuarios from './pages/Usuarios'
+import Reportes from './pages/Reportes'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-         <Route path="/crear-caso" element={<CrearCaso />} />
 
-        {/* Login SIN sidebar */}
+        {/* 🔓 Login SIN sidebar */}
         <Route path="/" element={<Login />} />
 
-        {/* Todo lo demás CON sidebar */}
+        {/* 🔐 RUTAS CON LAYOUT */}
         <Route path="/dashboard" element={
           <Layout>
             <Dashboard />
@@ -24,6 +25,23 @@ function App() {
         <Route path="/casos" element={
           <Layout>
             <Casos />
+          </Layout>
+        } />
+
+        <Route path="/usuarios" element={
+          <Layout>
+            <Usuarios />
+          </Layout>
+        } />
+        <Route path="/reportes" element={
+        <Layout>
+         <Reportes />
+        </Layout>
+        } />
+
+        <Route path="/crear-caso" element={
+          <Layout>
+            <CrearCaso />
           </Layout>
         } />
 
