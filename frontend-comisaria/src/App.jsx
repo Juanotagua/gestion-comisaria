@@ -1,72 +1,35 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Dashboard from './pages/Dashboard'
+import Casos from './pages/Casos'
+import Login from './pages/Login'
+import Layout from './components/Layout'
+import CrearCaso from './pages/CrearCaso'
 
-function App(){
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+         <Route path="/crear-caso" element={<CrearCaso />} />
 
-const [casos,setCasos]=useState([]);
+        {/* Login SIN sidebar */}
+        <Route path="/" element={<Login />} />
 
-useEffect(()=>{
- obtenerCasos();
-},[]);
+        {/* Todo lo demás CON sidebar */}
+        <Route path="/dashboard" element={
+          <Layout>
+            <Dashboard />
+          </Layout>
+        } />
 
-const obtenerCasos = async()=>{
+        <Route path="/casos" element={
+          <Layout>
+            <Casos />
+          </Layout>
+        } />
 
-try{
-
-const res = await axios.get(
-"http://localhost:3000/api/casos"
-);
-
-setCasos(res.data);
-
-}catch(error){
-console.error(error);
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
-};
-
-return(
-
-<div style={{padding:"30px"}}>
-
-<h1>Listado de Casos</h1>
-
-{casos.map(caso=>(
-<div
-key={caso.id_caso}
-style={{
-border:"1px solid gray",
-margin:"15px",
-padding:"15px",
-borderRadius:"10px"
-}}
->
-
-<h3>{caso.numero_radicado}</h3>
-
-<p>
-Tipo proceso: {caso.id_tipo_proceso}
-</p>
-
-<p>
-Estado: {caso.id_estado}
-</p>
-
-<p>
-Prioridad: {caso.id_prioridad}
-</p>
-
-<p>
-{caso.descripcion_hechos}
-</p>
-
-</div>
-))}
-
-</div>
-
-)
-
-}
-
-export default App;
+export default App
