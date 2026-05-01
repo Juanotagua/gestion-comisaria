@@ -7,7 +7,13 @@ function Sidebar() {
   return (
     <div style={sidebar}>
 
-      <h2 style={logo}>Comisaría</h2>
+      {/* 🔥 LOGO CLICKABLE */}
+      <h2 
+        style={{ ...logo, cursor: 'pointer' }}
+        onClick={() => navigate('/dashboard')}
+      >
+        Comisaría
+      </h2>
 
       <div style={menu}>
 
@@ -27,10 +33,19 @@ function Sidebar() {
           ➕ Crear Caso
         </div>
 
-        <div style={item} onClick={() => navigate('/reportes')}>
-          📈 Estadísticas
-        </div>
+      </div>
 
+      {/* 🔥 LOGOUT ABAJO */}
+      <div style={logoutContainer}>
+        <div 
+          style={logout}
+          onClick={() => {
+            localStorage.clear()
+            window.location.href = '/'
+          }}
+        >
+          🚪 Cerrar sesión
+        </div>
       </div>
 
     </div>
@@ -43,7 +58,10 @@ const sidebar = {
   background: '#0f172a',
   color: 'white',
   padding: '20px',
-  height: '100vh'
+  height: '100vh',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between'
 }
 
 const logo = {
@@ -60,7 +78,19 @@ const item = {
   cursor: 'pointer',
   padding: '10px',
   borderRadius: '6px',
-  transition: '0.2s'
+  transition: '0.2s',
+  background: 'transparent'
+}
+
+const logoutContainer = {
+  marginTop: 'auto'
+}
+
+const logout = {
+  cursor: 'pointer',
+  padding: '10px',
+  borderRadius: '6px',
+  background: '#1e293b'
 }
 
 export default Sidebar

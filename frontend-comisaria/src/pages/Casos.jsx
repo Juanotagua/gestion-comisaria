@@ -10,6 +10,10 @@ function Casos() {
   const [casoSeleccionado, setCasoSeleccionado] = useState(null)
   const [mostrarModal, setMostrarModal] = useState(false)
   const usuario = JSON.parse(localStorage.getItem('usuario'))
+  const [busqueda, setBusqueda] = useState('')
+  const [estadoFiltro, setEstadoFiltro] = useState('')
+  const [prioridadFiltro, setPrioridadFiltro] = useState('')
+  const [orden, setOrden] = useState('reciente')
 
   // 🔹 Obtener casos
  const obtenerCasos = () => {
@@ -69,7 +73,36 @@ function Casos() {
       alert('Error asignando caso')
     }
   }
+const limpiarFiltros = () => {
+  setBusqueda('')
+  setEstadoFiltro('')
+  setPrioridadFiltro('')
+  setOrden('reciente')
+}
+const casosFiltrados = casos
+  .filter(caso => {
 
+    const texto = busqueda.toLowerCase().trim()
+
+    const matchBusqueda =
+      caso.numero_radicado.toLowerCase().includes(texto)
+
+    const matchEstado = estadoFiltro
+      ? caso.nombre_estado.toLowerCase() === estadoFiltro.toLowerCase()
+      : true
+
+    const matchPrioridad = prioridadFiltro
+      ? caso.nombre_prioridad.toLowerCase() === prioridadFiltro.toLowerCase()
+      : true
+      
+
+    return matchBusqueda && matchEstado && matchPrioridad
+  })
+  .sort((a, b) => {
+    if (orden === 'reciente') return b.id_caso - a.id_caso
+    if (orden === 'antiguo') return a.id_caso - b.id_caso
+    return 0
+  })
   return (
     <div style={{ padding: '30px' }}>
       <h1>Listado de Casos</h1>
@@ -77,11 +110,64 @@ function Casos() {
       <button onClick={() => navigate('/crear-caso')}>
         ➕ Crear Caso
       </button>
+      <div style={filtrosContainer}>
+
+  <input
+    placeholder="Buscar por radicado..."
+    value={busqueda}
+    onChange={(e) => setBusqueda(e.target.value)}
+    style={input}
+  />
+<select 
+  value={orden} 
+  onChange={(e) => setOrden(e.target.value)} 
+  style={select}
+>
+  <option value="reciente">Más recientes</option>
+  <option value="antiguo">Más antiguos</option>
+</select>
+  <select value={estadoFiltro} onChange={(e) => setEstadoFiltro(e.target.value)} style={select}>
+    <option value="">Estado</option>
+    <option value="Abierto">Abierto</option>
+    <option value="Inactivo">Inactivo</option>
+  </select>
+
+  <select value={prioridadFiltro} onChange={(e) => setPrioridadFiltro(e.target.value)} style={select}>
+    <option value="">Prioridad</option>
+    <option value="Alta">Alta</option>
+    <option value="Media">Media</option>
+  </select>
+  <button onClick={limpiarFiltros} style={btnLimpiar}>
+  Limpiar
+</button>
+<p style={{ marginTop: '10px' }}>
+  🔎 {casosFiltrados.length} resultado(s)
+</p>
+{casosFiltrados.length === 0 && (
+  <div style={emptyState}>
+    <h3>🔍 Sin resultados</h3>
+    <p>Intenta cambiar los filtros o el radicado</p>
+  </div>
+)}
+
+</div>
 
       {/* 🔹 LISTADO */}
-      {casos.map(caso => (
-        <div key={caso.id_caso} style={cardStyle}>
-          <h3>{caso.numero_radicado}</h3>
+      {casosFiltrados.map(caso => (
+        <div 
+  key={caso.id_caso} 
+  style={cardStyle}
+  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+>
+          <h3>
+  {busqueda
+    ? caso.numero_radicado.replace(
+        new RegExp(busqueda, 'gi'),
+        match => `👉${match}👈`
+      )
+    : caso.numero_radicado}
+</h3>
           <p><b>Estado:</b> {caso.nombre_estado}</p>
           <p><b>Prioridad:</b> {caso.nombre_prioridad}</p>
           <p>{caso.descripcion_hechos}</p>
@@ -148,13 +234,54 @@ function Casos() {
 }
 
 /* 🎨 ESTILOS */
+const emptyState = {
+  marginTop: '10px',
+  padding: '30px',
+  textAlign: 'center',
+  background: '#f8fafc',
+  borderRadius: '10px',
+  color: '#64748b'
+}
+const noResultados = {
+  marginTop: '20px',
+  padding: '15px',
+  background: '#fee2e2',
+  borderRadius: '8px',
+  color: '#b91c1c'
+}
+const btnLimpiar = {
+  padding: '10px',
+  background: '#ef4444',
+  color: 'white',
+  border: 'none',
+  borderRadius: '6px',
+  cursor: 'pointer'
+}
 
 const cardStyle = {
   background: '#fff',
   padding: '15px',
   margin: '15px 0',
   borderRadius: '10px',
-  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+  transition: '0.2s',
+  cursor: 'pointer'
+}
+const filtrosContainer = {
+  display: 'flex',
+  gap: '10px',
+  margin: '20px 0'
+}
+
+const input = {
+  padding: '10px',
+  borderRadius: '8px',
+  border: '1px solid #ccc'
+}
+
+const select = {
+  padding: '10px',
+  borderRadius: '8px'
 }
 
 const overlay = {
