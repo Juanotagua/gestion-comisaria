@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-
+import Toast from '../components/Toast'
 function Reportes() {
 
   const [resumen, setResumen] = useState(null)
@@ -10,7 +10,9 @@ function Reportes() {
   useEffect(() => {
 
     const cargar = async () => {
+
       try {
+
         const r1 = await fetch('http://localhost:3000/api/dashboard/resumen')
         setResumen(await r1.json())
 
@@ -26,163 +28,368 @@ function Reportes() {
       } catch (err) {
         console.error(err)
       }
+
     }
 
     cargar()
 
   }, [])
 
-  if (!resumen) return <p style={{ padding: '30px' }}>Cargando estadísticas...</p>
+  if (!resumen) {
+    return (
+      <div style={loadingContainer}>
+        <div style={loadingCard}>
+          Cargando estadísticas...
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div style={container}>
-      <h1>📈 Estadísticas del Sistema</h1>
 
-      {/* 🔹 TARJETAS */}
-      <div style={grid}>
-        <Card title="Casos activos" value={resumen.casos_activos} />
-        <Card title="Prioridad alta" value={resumen.prioridad_alta} />
-        <Card title="Funcionarios" value={resumen.funcionarios} />
+    <div style={container}>
+
+      {/* HEADER */}
+      <div style={header}>
+
+        <div>
+          <h1 style={title}>
+            Dashboard
+          </h1>
+
+          <p style={subtitle}>
+            Estadísticas generales del sistema
+          </p>
+        </div>
+
       </div>
 
-      {/* 🔹 PRIORIDADES */}
+      {/* TARJETAS */}
+      <div style={grid}>
+
+        <Card
+          title="Casos activos"
+          value={resumen.casos_activos}
+          color="#2563EB"
+        />
+
+        <Card
+          title="Prioridad alta"
+          value={resumen.prioridad_alta}
+          color="#DC2626"
+        />
+
+        <Card
+          title="Funcionarios"
+          value={resumen.funcionarios}
+          color="#7C3AED"
+        />
+
+      </div>
+
+      {/* PRIORIDAD */}
       <Section title="Casos por prioridad">
-        {prioridades.map(p => (
-          <Bar 
+
+        {prioridades.map((p) => (
+
+          <Bar
             key={p.nombre_prioridad}
             label={p.nombre_prioridad}
             value={p.total}
             color={getColorPrioridad(p.nombre_prioridad)}
           />
+
         ))}
+
       </Section>
 
-      {/* 🔹 ESTADOS */}
+      {/* ESTADOS */}
       <Section title="Casos por estado">
-        {estados.map(e => (
-          <Bar 
+
+        {estados.map((e) => (
+
+          <Bar
             key={e.nombre_estado}
             label={e.nombre_estado}
             value={e.total}
-            color="#3b82f6"
+            color="#2563EB"
           />
+
         ))}
+
       </Section>
 
-      {/* 🔹 TOP USUARIOS */}
+      {/* TOP USUARIOS */}
       <Section title="Funcionarios con más casos">
-        {topUsuarios.map(u => (
-          <Bar 
+
+        {topUsuarios.map((u) => (
+
+          <Bar
             key={u.nombre}
             label={u.nombre}
             value={u.total}
-            color="#8b5cf6"
+            color="#7C3AED"
           />
+
         ))}
+
       </Section>
 
     </div>
+
   )
+
 }
 
-// 🔹 COMPONENTES
+/* COMPONENTES */
 
-function Card({ title, value }) {
+function Card({ title, value, color }) {
+
   return (
-    <div style={card}>
-      <h3>{title}</h3>
-      <p style={number}>{value}</p>
+
+    <div
+      style={card}
+
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform =
+          'translateY(-4px)'
+
+        e.currentTarget.style.boxShadow =
+          '0 16px 30px rgba(0,0,0,0.08)'
+      }}
+
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform =
+          'translateY(0px)'
+
+        e.currentTarget.style.boxShadow =
+          '0 6px 18px rgba(0,0,0,0.05)'
+      }}
+    >
+
+      <div
+        style={{
+          ...circle,
+          background: color
+        }}
+      />
+
+      <h3 style={cardTitle}>
+        {title}
+      </h3>
+
+      <p
+        style={{
+          ...number,
+          color
+        }}
+      >
+        {value}
+      </p>
+
     </div>
+
   )
+
 }
 
 function Section({ title, children }) {
+
   return (
-    <div style={{ marginTop: '30px' }}>
-      <h2>{title}</h2>
-      {children}
+
+    <div style={section}>
+
+      <div style={sectionHeader}>
+        <h2 style={sectionTitle}>
+          {title}
+        </h2>
+      </div>
+
+      <div style={sectionContent}>
+        {children}
+      </div>
+
     </div>
+
   )
+
 }
 
 function Bar({ label, value, color }) {
 
-  const width = value * 40
+  const width = value * 35
 
   return (
+
     <div style={barContainer}>
-      <span style={{ width: '150px' }}>{label}</span>
+
+      <div style={barTop}>
+
+        <span style={barLabel}>
+          {label}
+        </span>
+
+        <span style={barValue}>
+          {value}
+        </span>
+
+      </div>
 
       <div style={barBg}>
+
         <div
           style={{
             ...barFill,
             width: `${width}px`,
-            background: color,
-            animation: 'grow 0.5s ease'
+            background: color
           }}
         />
+
       </div>
 
-      <span>{value}</span>
     </div>
+
   )
+
 }
 
-// 🎨 ESTILOS
+/* ESTILOS */
 
 const container = {
-  padding: '30px',
-  background: '#f1f5f9',
+  padding: '35px',
+  background: '#F8FAFC',
   minHeight: '100vh'
 }
 
+const loadingContainer = {
+  padding: '40px'
+}
+
+const loadingCard = {
+  background: 'white',
+  padding: '30px',
+  borderRadius: '18px',
+  border: '1px solid #E2E8F0'
+}
+
+const header = {
+  marginBottom: '35px'
+}
+
+const title = {
+  margin: 0,
+  fontSize: '38px',
+  color: '#0F172A'
+}
+
+const subtitle = {
+  marginTop: '10px',
+  color: '#64748B',
+  fontSize: '15px'
+}
+
 const grid = {
-  display: 'flex',
-  gap: '20px',
-  flexWrap: 'wrap'
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+  gap: '20px'
 }
 
 const card = {
-  background: 'white',
-  padding: '20px',
-  borderRadius: '12px',
-  boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
-  minWidth: '200px',
-  textAlign: 'center'
+  background: '#FFFFFF',
+  borderRadius: '22px',
+  padding: '28px',
+  border: '1px solid #E2E8F0',
+  boxShadow: '0 6px 18px rgba(0,0,0,0.05)',
+  transition: '0.25s ease',
+  cursor: 'default'
+}
+
+const circle = {
+  width: '14px',
+  height: '14px',
+  borderRadius: '50%',
+  marginBottom: '18px'
+}
+
+const cardTitle = {
+  color: '#64748B',
+  fontSize: '15px',
+  fontWeight: '600'
 }
 
 const number = {
-  fontSize: '28px',
-  color: '#3b82f6',
-  marginTop: '10px'
+  fontSize: '42px',
+  fontWeight: '700',
+  marginTop: '12px',
+  marginBottom: 0
+}
+
+const section = {
+  marginTop: '35px',
+  background: '#FFFFFF',
+  borderRadius: '22px',
+  border: '1px solid #E2E8F0',
+  overflow: 'hidden'
+}
+
+const sectionHeader = {
+  padding: '22px 26px',
+  borderBottom: '1px solid #E2E8F0'
+}
+
+const sectionTitle = {
+  margin: 0,
+  color: '#0F172A',
+  fontSize: '22px'
+}
+
+const sectionContent = {
+  padding: '26px'
 }
 
 const barContainer = {
+  marginBottom: '22px'
+}
+
+const barTop = {
   display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-  margin: '10px 0'
+  justifyContent: 'space-between',
+  marginBottom: '10px'
+}
+
+const barLabel = {
+  color: '#334155',
+  fontWeight: '600'
+}
+
+const barValue = {
+  color: '#64748B'
 }
 
 const barBg = {
-  flex: 1,
-  height: '10px',
-  background: '#e2e8f0',
-  borderRadius: '6px'
+  width: '100%',
+  height: '12px',
+  background: '#E2E8F0',
+  borderRadius: '999px',
+  overflow: 'hidden'
 }
 
 const barFill = {
-  height: '10px',
-  borderRadius: '6px'
+  height: '12px',
+  borderRadius: '999px',
+  transition: '0.4s ease'
 }
 
-// 🎨 colores prioridad
+/* COLORES PRIORIDAD */
+
 const getColorPrioridad = (p) => {
-  if (p === 'Alta') return '#ef4444'
-  if (p === 'Media') return '#f59e0b'
-  if (p === 'Baja') return '#22c55e'
-  return '#3b82f6'
+
+  if (p === 'Alta') return '#DC2626'
+  if (p === 'Media') return '#F59E0B'
+  if (p === 'Baja') return '#16A34A'
+
+  return '#2563EB'
+
 }
 
 export default Reportes

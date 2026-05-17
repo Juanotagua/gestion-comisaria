@@ -1,96 +1,237 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 function Sidebar() {
 
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const menuItems = [
+    {
+      label: 'Dashboard',
+      route: '/dashboard'
+    },
+    {
+      label: 'Casos',
+      route: '/casos'
+    },
+    {
+      label: 'Usuarios',
+      route: '/usuarios'
+    },
+    {
+      label: 'Crear Caso',
+      route: '/crear-caso'
+    }
+  ]
 
   return (
+
     <div style={sidebar}>
 
-      {/* 🔥 LOGO CLICKABLE */}
-      <h2 
-        style={{ ...logo, cursor: 'pointer' }}
-        onClick={() => navigate('/dashboard')}
-      >
-        Comisaría
-      </h2>
+      {/* TOP */}
+      <div>
 
-      <div style={menu}>
+        {/* LOGO */}
+        <div style={logoContainer}>
 
-        <div style={item} onClick={() => navigate('/dashboard')}>
-          📊 Dashboard
+          <div style={logoCircle} />
+
+          <div>
+
+            <h1
+              style={logo}
+              onClick={() => navigate('/dashboard')}
+            >
+              Comisaría
+            </h1>
+
+            <p style={subtitle}>
+              Sistema de Gestión
+            </p>
+
+          </div>
+
         </div>
 
-        <div style={item} onClick={() => navigate('/casos')}>
-          📂 Casos
-        </div>
+        {/* MENU */}
+        <div style={menu}>
 
-        <div style={item} onClick={() => navigate('/usuarios')}>
-          👥 Usuarios
-        </div>
+          {menuItems.map((item) => {
 
-        <div style={item} onClick={() => navigate('/crear-caso')}>
-          ➕ Crear Caso
+            const activo =
+              location.pathname === item.route
+
+            return (
+
+              <div
+                key={item.route}
+
+                onClick={() => navigate(item.route)}
+
+                style={{
+                  ...menuItem,
+                  ...(activo ? activeItem : {})
+                }}
+
+                onMouseEnter={(e) => {
+
+                  if (!activo) {
+                    e.currentTarget.style.background =
+                      '#1E293B'
+                  }
+
+                }}
+
+                onMouseLeave={(e) => {
+
+                  if (!activo) {
+                    e.currentTarget.style.background =
+                      'transparent'
+                  }
+
+                }}
+              >
+
+                <span>
+                  {item.label}
+                </span>
+
+              </div>
+
+            )
+
+          })}
+
         </div>
 
       </div>
 
-      {/* 🔥 LOGOUT ABAJO */}
-      <div style={logoutContainer}>
-        <div 
-          style={logout}
+      {/* FOOTER */}
+      <div style={footer}>
+
+        <div style={footerLine} />
+
+        <button
+          style={logoutButton}
+
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background =
+              '#334155'
+          }}
+
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background =
+              '#1E293B'
+          }}
+
           onClick={() => {
             localStorage.clear()
             window.location.href = '/'
           }}
         >
-          🚪 Cerrar sesión
-        </div>
+          Cerrar sesión
+        </button>
+
       </div>
 
     </div>
+
   )
+
 }
 
-// 🎨 estilos
+/* ESTILOS */
+
 const sidebar = {
-  width: '220px',
-  background: '#0f172a',
+  width: '270px',
+  background: '#0F172A',
   color: 'white',
-  padding: '20px',
   height: '100vh',
+  padding: '28px 20px',
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'space-between'
+  justifyContent: 'space-between',
+  boxSizing: 'border-box',
+  borderRight: '1px solid rgba(255,255,255,0.06)'
+}
+
+const logoContainer = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '14px',
+  marginBottom: '45px'
+}
+
+const logoCircle = {
+  width: '18px',
+  height: '18px',
+  borderRadius: '50%',
+  background: '#8B1E2D',
+  boxShadow: '0 0 12px rgba(139,30,45,0.45)'
 }
 
 const logo = {
-  marginBottom: '30px'
+  margin: 0,
+  fontSize: '28px',
+  fontWeight: '700',
+  color: '#FFFFFF',
+  cursor: 'pointer',
+  letterSpacing: '0.3px'
+}
+
+const subtitle = {
+  marginTop: '6px',
+  color: '#94A3B8',
+  fontSize: '14px'
 }
 
 const menu = {
   display: 'flex',
   flexDirection: 'column',
-  gap: '15px'
+  gap: '10px'
 }
 
-const item = {
+const menuItem = {
+  padding: '14px 16px',
+  borderRadius: '14px',
   cursor: 'pointer',
-  padding: '10px',
-  borderRadius: '6px',
-  transition: '0.2s',
-  background: 'transparent'
+  transition: '0.2s ease',
+  fontSize: '15px',
+  fontWeight: '500',
+  color: '#E2E8F0',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between'
 }
 
-const logoutContainer = {
+const activeItem = {
+  background: '#8B1E2D',
+  color: '#FFFFFF',
+  boxShadow: '0 8px 20px rgba(139,30,45,0.28)'
+}
+
+const footer = {
   marginTop: 'auto'
 }
 
-const logout = {
+const footerLine = {
+  width: '100%',
+  height: '1px',
+  background: 'rgba(255,255,255,0.08)',
+  marginBottom: '20px'
+}
+
+const logoutButton = {
+  width: '100%',
+  padding: '14px',
+  border: 'none',
+  borderRadius: '14px',
+  background: '#1E293B',
+  color: '#FFFFFF',
+  fontSize: '14px',
+  fontWeight: '600',
   cursor: 'pointer',
-  padding: '10px',
-  borderRadius: '6px',
-  background: '#1e293b'
+  transition: '0.2s ease'
 }
 
 export default Sidebar

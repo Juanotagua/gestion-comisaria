@@ -27,5 +27,77 @@ router.get('/:idCaso', async (req, res) => {
     res.status(500).json({ error: error.message })
   }
 })
+/* =========================
+   CREAR COMENTARIO
+========================= */
+
+router.post('/', async (req, res) => {
+
+  try {
+
+    const {
+      id_caso,
+      id_usuario,
+      descripcion
+    } = req.body
+
+    if (
+      !id_caso ||
+      !id_usuario ||
+      !descripcion
+    ) {
+
+      return res.status(400).json({
+        error: 'Todos los campos son obligatorios'
+      })
+
+    }
+
+    // 🔥 ACCIÓN COMENTARIO
+    const id_accion = 4
+
+    const result = await db.query(`
+
+      INSERT INTO seguimiento(
+        id_caso,
+        id_usuario,
+        id_accion,
+        descripcion,
+        fecha_registro
+      )
+
+      VALUES(
+        $1,
+        $2,
+        $3,
+        $4,
+        NOW()
+      )
+
+      RETURNING *
+
+    `, [
+      id_caso,
+      id_usuario,
+      id_accion,
+      descripcion
+    ])
+
+    res.status(201).json({
+      mensaje: 'Comentario agregado',
+      seguimiento: result.rows[0]
+    })
+
+  } catch (error) {
+
+    console.error(error)
+
+    res.status(500).json({
+      error: 'Error agregando comentario'
+    }) 
+
+  }
+
+})
 
 module.exports = router
