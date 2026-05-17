@@ -26,7 +26,7 @@ function Casos() {
   // 🔹 Obtener casos
   const obtenerCasos = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/casos', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/casos`, {
         params: {
           id_usuario: usuario.id_usuario,
           rol: usuario.nombre_rol
@@ -42,7 +42,7 @@ function Casos() {
   // 🔹 Obtener usuarios
   const obtenerUsuarios = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/usuarios')
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/usuarios`)
       setUsuarios(res.data)
     } catch (error) {
       console.error(error)
@@ -52,7 +52,7 @@ function Casos() {
   // 🔹 Obtener estados
   const obtenerEstados = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/catalogos/estados')
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/catalogos/estados`)
       setEstados(res.data)
     } catch (error) {
       console.error(error)
@@ -78,7 +78,7 @@ function Casos() {
   // 🔥 VER SEGUIMIENTO
   const verSeguimiento = async (idCaso) => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/seguimiento/${idCaso}`)
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/seguimiento/${idCaso}`)
       setSeguimiento(res.data)
       setCasoSeleccionado(idCaso)
       setMostrarModal(true)
@@ -96,7 +96,7 @@ const descargarPDF = async (idCaso) => {
   try {
 
     const response = await axios.get(
-      `http://localhost:3000/api/casos/${idCaso}/pdf`,
+      `${import.meta.env.VITE_API_URL}/api/casos/${idCaso}/pdf`,
       {
         responseType: 'blob'
       }
@@ -112,7 +112,7 @@ const descargarPDF = async (idCaso) => {
     link.href = url
 
     link.setAttribute(
-      'download',
+      `download`,
       `caso-${idCaso}.pdf`
     )
 
@@ -147,7 +147,7 @@ const agregarComentario = async () => {
     setGuardandoComentario(true)
 
     await axios.post(
-      'http://localhost:3000/api/seguimiento',
+      `${import.meta.env.VITE_API_URL}/api/seguimiento`,
       {
         id_caso: casoSeleccionado,
         id_usuario: usuario.id_usuario,
@@ -185,7 +185,7 @@ const agregarComentario = async () => {
     }
 
     try {
-      await axios.put(`http://localhost:3000/api/casos/${idCaso}/reasignar`, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/casos/${idCaso}/reasignar`, {
         id_usuario_asignado: Number(idUsuario),
         rol: usuario.nombre_rol
       })
@@ -213,7 +213,7 @@ const agregarComentario = async () => {
     }
 
     try {
-      await axios.put(`http://localhost:3000/api/casos/${idCaso}/estado`, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/casos/${idCaso}/estado`, {
         id_estado: Number(nuevoEstado)
       })
 

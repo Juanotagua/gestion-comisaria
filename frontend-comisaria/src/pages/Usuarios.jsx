@@ -49,7 +49,7 @@ const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null)
     try {
 
       const res = await axios.get(
-        'http://localhost:3000/api/usuarios'
+        `${import.meta.env.VITE_API_URL}/api/usuarios`
       )
 
       setUsuarios(res.data)
@@ -72,7 +72,7 @@ const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null)
     try {
 
       const res = await axios.get(
-        'http://localhost:3000/api/usuarios/roles'
+        `${import.meta.env.VITE_API_URL}/api/usuarios/roles`
       )
 
       setRoles(res.data)
@@ -145,7 +145,7 @@ if (
 }
 
       await axios.post(
-        'http://localhost:3000/api/usuarios',
+        `${import.meta.env.VITE_API_URL}/api/usuarios`,
         nuevoUsuario
       )
 
@@ -183,7 +183,7 @@ if (
   try {
 
     const res = await axios.get(
-      `http://localhost:3000/api/usuarios/${usuario.id_usuario}/casos`
+      `${import.meta.env.VITE_API_URL}/api/usuarios/${usuario.id_usuario}/casos`
     )
 
     setCasosUsuario(res.data)

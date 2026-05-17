@@ -41,16 +41,16 @@ function CrearCaso() {
       try {
 
         const tiposRes = await axios.get(
-          'http://localhost:3000/api/catalogos/tipos-proceso'
-        )
+  `${import.meta.env.VITE_API_URL}/api/catalogos/tipos-proceso`
+)
 
-        const estadosRes = await axios.get(
-          'http://localhost:3000/api/catalogos/estados'
-        )
+const estadosRes = await axios.get(
+  `${import.meta.env.VITE_API_URL}/api/catalogos/estados`
+)
 
-        const prioridadesRes = await axios.get(
-          'http://localhost:3000/api/catalogos/prioridades'
-        )
+const prioridadesRes = await axios.get(
+  `${import.meta.env.VITE_API_URL}/api/catalogos/prioridades`
+)
 
         setTipos(tiposRes.data)
         setEstados(estadosRes.data)
@@ -134,7 +134,7 @@ function CrearCaso() {
       setLoading(true)
 
       await axios.post(
-        'http://localhost:3000/api/casos',
+        `${import.meta.env.VITE_API_URL}/api/casos`,
         {
           numero_radicado: form.numero,
 
