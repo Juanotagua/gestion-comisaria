@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Toast from '../components/Toast'
+import EstadoBadge from '../components/EstadoBadge'
+import PrioridadBadge from '../components/PrioridadBadge'
+import CasoCard from '../components/CasoCard'
+import TimelineSeguimiento from '../components/TimelineSeguimiento'
+import ModalSeguimiento from '../components/ModalSeguimiento'
+import ModalGestionCaso from '../components/ModalGestionCaso'
 
 function Casos() {
 
@@ -22,6 +28,13 @@ function Casos() {
   const [usuarioAsignar, setUsuarioAsignar] = useState({})
   const [estados, setEstados] = useState([])
   const [estadoSeleccionado, setEstadoSeleccionado] = useState({})
+  const [modalSeguimiento, setModalSeguimiento] = useState(false)
+  const [casoModal, setCasoModal] = useState(null)
+  const [toast, setToast] = useState({ visible: false, mensaje: '',tipo: 'success'})
+  const [modalGestion, setModalGestion] = useState(false)
+  const [casoGestion, setCasoGestion] = useState(null)
+  const [casoGestionando, setCasoGestionando] =useState(null)
+
 
   // 🔹 Obtener casos
   const obtenerCasos = async () => {
@@ -35,9 +48,39 @@ function Casos() {
       setCasos(res.data)
     } catch (error) {
       console.error(error)
-      alert('Error cargando casos')
+      mostrarToast('Error cargando casos', 'error')
     }
   }
+  
+ const abrirGestion = (caso) => {
+
+  setCasoGestion(caso)
+
+  setModalGestion(true)
+
+}
+  const mostrarToast = (
+  mensaje,
+  tipo = 'success'
+) => {
+
+  setToast({
+    visible: true,
+    mensaje,
+    tipo
+  })
+
+  setTimeout(() => {
+
+    setToast({
+      visible: false,
+      mensaje: '',
+      tipo: 'success'
+    })
+
+  }, 3000)
+
+}
 
   // 🔹 Obtener usuarios
   const obtenerUsuarios = async () => {
@@ -76,17 +119,30 @@ function Casos() {
   }
 
   // 🔥 VER SEGUIMIENTO
-  const verSeguimiento = async (idCaso) => {
-    try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/seguimiento/${idCaso}`)
-      setSeguimiento(res.data)
-      setCasoSeleccionado(idCaso)
-      setMostrarModal(true)
-    } catch (error) {
-      console.error(error)
-      alert('Error obteniendo seguimiento')
-    }
+  const verSeguimiento = async (caso) => {
+
+  try {
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/seguimiento/${caso.id_caso}`
+    )
+
+    setSeguimiento(response.data)
+
+    setCasoModal(caso)
+
+    setModalSeguimiento(true)
+
+  } catch (error) {
+
+    console.error(error)
+
+    mostrarToast('Error obteniendo seguimiento', 'error')
+
+
   }
+
+}
   /* =========================
    DESCARGAR PDF
 ========================= */
@@ -126,89 +182,107 @@ const descargarPDF = async (idCaso) => {
 
     console.error(error)
 
-    mostrarToast(
-      'Error generando PDF',
-      'error'
-    )
+    mostrarToast('Error generando PDF','error')
 
   }
 
 }
   // 🔥 AGREGAR COMENTARIO
-const agregarComentario = async () => {
+const agregarComentario = async (
+  idCaso,
+  texto
+) => {
 
   try {
 
-    if (!comentario.trim()) {
-      alert('Ingrese un comentario')
-      return
-    }
+    if (!texto.trim()) {
 
-    setGuardandoComentario(true)
+      mostrarToast('Ingrese un comentario','error')
+
+      return
+
+    }
+    console.log({
+  idCaso,
+  usuario,
+  texto
+})
 
     await axios.post(
       `${import.meta.env.VITE_API_URL}/api/seguimiento`,
       {
-        id_caso: casoSeleccionado,
+        id_caso: idCaso,
+
         id_usuario: usuario.id_usuario,
-        descripcion: comentario
+
+        descripcion: texto
       }
     )
 
-    // 🔥 RECARGAR SEGUIMIENTO
-    await verSeguimiento(casoSeleccionado)
+    mostrarToast('Comentario agregado','success')
 
-    setComentario('')
+    obtenerCasos()
 
   } catch (error) {
 
     console.error(error)
 
-    alert('Error agregando comentario')
-
-  } finally {
-
-    setGuardandoComentario(false)
+    mostrarToast('Error agregando comentario', 'error')
 
   }
 
 }
 
   // 🔥 ASIGNAR CASO
-  const asignarCaso = async (idCaso) => {
+ const asignarCaso = async (
+  idCaso,
+  idUsuario
+) => {
 
-    const idUsuario = usuarioAsignar[idCaso]
+  if (!idUsuario) {
 
-    if (!idUsuario) {
-      alert('Seleccione un usuario')
-      return
-    }
+    mostrarToast('Seleccione un usuario','error')
+    return
 
-    try {
-      await axios.put(`${import.meta.env.VITE_API_URL}/api/casos/${idCaso}/reasignar`, {
+  }
+
+  try {
+
+    await axios.put(
+      `${import.meta.env.VITE_API_URL}/api/casos/${idCaso}/reasignar`,
+      {
         id_usuario_asignado: Number(idUsuario),
         rol: usuario.nombre_rol
-      })
-
-      alert('Caso asignado correctamente')
-      obtenerCasos()
-
-    } catch (error) {
-      console.error(error)
-
-      if (error.response?.status === 403) {
-        alert('No tienes permisos para reasignar')
-      } else {
-        alert('Error asignando caso')
       }
+    )
+
+    mostrarToast('Caso asignado correctamente','success')
+
+    obtenerCasos()
+
+  } catch (error) {
+
+    console.error(error)
+
+    if (error.response?.status === 403) {
+
+      mostrarToast('No tienes permisos para reasignar','error')
+
+    } else {
+
+      mostrarToast('Error asignando caso','error')
+
     }
+
   }
+
+}
 
   //  ACTUALIZAR ESTADO 
   const actualizarEstado = async (idCaso, nuevoEstado) => {
 
     if (!nuevoEstado || nuevoEstado === '') {
-      alert('Seleccione un estado válido')
+      mostrarToast('Seleccione un estado válido', 'error')
       return
     }
 
@@ -217,7 +291,7 @@ const agregarComentario = async () => {
         id_estado: Number(nuevoEstado)
       })
 
-      alert('Estado actualizado correctamente')
+      mostrarToast('Estado actualizado correctamente','success')
       obtenerCasos()
 
       // limpiar selección
@@ -228,7 +302,7 @@ const agregarComentario = async () => {
 
     } catch (error) {
       console.error(error)
-      alert(error.response?.data?.error || 'Error actualizando estado')
+      mostrarToast(error.response?.data?.error || 'Error actualizando estado','error')
     }
   }
 
@@ -388,356 +462,25 @@ const agregarComentario = async () => {
           <h3> Sin resultados</h3>
         </div>
       )}
+<div style={cardsGrid}>
 
-      {casosFiltrados.map((caso) => (
+  {casosFiltrados.map((caso) => (
 
-  <div
+   <CasoCard
   key={caso.id_caso}
-  style={cardStyle}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.transform = 'translateY(-3px)'
-    e.currentTarget.style.boxShadow =
-      '0 12px 24px rgba(0,0,0,0.08)'
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.transform = 'translateY(0px)'
-    e.currentTarget.style.boxShadow =
-      '0 4px 14px rgba(0,0,0,0.04)'
-  }}
->
 
-    {/* HEADER */}
-    <div style={cardHeader}>
+  caso={caso}
 
-      <div>
-        <h2 style={radicadoStyle}>
-          {caso.numero_radicado}
-        </h2>
+  verSeguimiento={verSeguimiento}
 
-        <p style={descripcionStyle}>
-          {caso.descripcion_hechos}
-        </p>
-      </div>
-      {/* FUNCIONARIO ASIGNADO */}
-<div style={{
-  marginTop: '14px',
-  padding: '10px 14px',
-  background: '#F8FAFC',
-  border: '1px solid #E2E8F0',
-  borderRadius: '12px',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px'
-}}>
+  descargarPDF={descargarPDF}
 
-  {/* AVATAR */}
-  <div style={{
-    width: '36px',
-    height: '36px',
-    borderRadius: '50%',
-    background: '#0F172A',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: 'bold',
-    fontSize: '14px'
-  }}>
-    {caso.usuario_asignado?.charAt(0) || 'N'}
-  </div>
+  abrirGestion={abrirGestion}
+/>
 
-  {/* INFO */}
-  <div>
-
-    <p style={{
-      margin: 0,
-      fontSize: '12px',
-      color: '#64748B'
-    }}>
-      Funcionario asignado
-    </p>
-
-    <strong style={{
-      color: '#0F172A',
-      fontSize: '14px'
-    }}>
-      {caso.usuario_asignado || 'Sin asignar'}
-    </strong>
-
-  </div>
+  ))}
 
 </div>
-
-      <div style={badgesContainer}>
-
-        {/* ESTADO */}
-        <span
-          style={{
-            ...badge,
-            background:
-              caso.nombre_estado === 'Abierto'
-                ? '#DBEAFE'
-                : caso.nombre_estado === 'Cerrado'
-                ? '#FEE2E2'
-                : '#FEF3C7',
-
-            color:
-              caso.nombre_estado === 'Abierto'
-                ? '#2563EB'
-                : caso.nombre_estado === 'Cerrado'
-                ? '#DC2626'
-                : '#B45309'
-          }}
-        >
-          {caso.nombre_estado}
-        </span>
-
-        {/* PRIORIDAD */}
-        <span
-          style={{
-            ...badge,
-            background:
-              caso.nombre_prioridad === 'Alta'
-                ? '#FEE2E2'
-                : caso.nombre_prioridad === 'Media'
-                ? '#FEF3C7'
-                : '#DCFCE7',
-
-            color:
-              caso.nombre_prioridad === 'Alta'
-                ? '#DC2626'
-                : caso.nombre_prioridad === 'Media'
-                ? '#B45309'
-                : '#15803D'
-          }}
-        >
-          Prioridad {caso.nombre_prioridad}
-        </span>
-
-      </div>
-
-    </div>
-
-    {/* ACCIONES */}
-
-    <div style={accionesGrid}>
-
-      {/* CAMBIAR ESTADO */}
-      <div style={accionBox}>
-
-        <label style={labelStyle}>
-          Estado del caso
-        </label>
-
-        <div style={filaAccion}>
-
-          <select
-            style={selectModern}
-  onFocus={(e) => {
-    e.currentTarget.style.border =
-      '1px solid #2563EB'
-
-    e.currentTarget.style.boxShadow =
-      '0 0 0 4px rgba(37,99,235,0.12)'
-  }}
-  onBlur={(e) => {
-    e.currentTarget.style.border =
-      '1px solid #CBD5E1'
-
-    e.currentTarget.style.boxShadow =
-      '0 1px 2px rgba(0,0,0,0.03)'
-  }}
-            value={
-              estadoSeleccionado[caso.id_caso] || ''
-            }
-            onChange={(e) =>
-              setEstadoSeleccionado({
-                ...estadoSeleccionado,
-                [caso.id_caso]: e.target.value
-              })
-            }
-          >
-            <option value="">
-              Seleccionar estado
-            </option>
-
-            {estados.map((estado) => (
-              <option
-                key={estado.id_estado}
-                value={estado.id_estado}
-              >
-                {estado.nombre_estado}
-              </option>
-            ))}
-          </select>
-
-          <button
-            style={btnPrimary}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.transform = 'translateY(-1px)'
-    e.currentTarget.style.background = '#1D4ED8'
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.transform = 'translateY(0px)'
-    e.currentTarget.style.background = '#2563EB'
-  }}
-            onClick={() =>
-              actualizarEstado(
-                caso.id_caso,
-                estadoSeleccionado[caso.id_caso]
-              )
-            }
-          >
-            Guardar
-          </button>
-
-
-        </div>
-        {/* AGREGAR COMENTARIO */}
-<div style={accionBox}>
-
-  <label style={labelStyle}>
-    Comentarios
-  </label>
-   {/* AGREGAR COMENTARIO */}
-<div style={accionBox}>
-
-  <label style={labelStyle}>
-    Comentarios
-  </label>
-
-  <div style={filaAccion}>
-
-    <button
-      style={btnSecondary}
-      onClick={() => {
-        setCasoSeleccionado(caso.id_caso)
-        setMostrarComentario(true)
-      }}
-    >
-      Agregar comentario
-    </button>
-
-  </div>
-  
-
-</div>
-
-  <div style={filaAccion}>
-
-    <button
-      style={btnSecondary}
-      onClick={() => {
-        setCasoSeleccionado(caso.id_caso)
-        setMostrarComentario(true)
-      }}
-    >
-      Agregar comentario
-    </button>
-
-  </div>
-  
-
-</div>
-
-
-      </div>
-
-      {/* REASIGNAR */}
-      {usuario?.nombre_rol?.toUpperCase() === 'COMISARIO' && (
-
-        <div style={accionBox}>
-
-          <label style={labelStyle}>
-            Reasignar funcionario
-          </label>
-
-          <div style={filaAccion}>
-
-            <select
-              style={selectModern}
-  onFocus={(e) => {
-    e.currentTarget.style.border =
-      '1px solid #2563EB'
-
-    e.currentTarget.style.boxShadow =
-      '0 0 0 4px rgba(37,99,235,0.12)'
-  }}
-  onBlur={(e) => {
-    e.currentTarget.style.border =
-      '1px solid #CBD5E1'
-
-    e.currentTarget.style.boxShadow =
-      '0 1px 2px rgba(0,0,0,0.03)'
-  }}
-              value={
-                usuarioAsignar[caso.id_caso] || ''
-              }
-              onChange={(e) =>
-                setUsuarioAsignar({
-                  ...usuarioAsignar,
-                  [caso.id_caso]: e.target.value
-                })
-              }
-            >
-              <option value="">
-                Seleccionar usuario
-              </option>
-
-              {usuarios.map((u) => (
-                <option
-                  key={u.id_usuario}
-                  value={u.id_usuario}
-                >
-                  {u.nombre}
-                </option>
-              ))}
-            </select>
-
-            <button
-              style={btnPrimary}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.transform = 'translateY(-1px)'
-    e.currentTarget.style.background = '#1D4ED8'
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.transform = 'translateY(0px)'
-    e.currentTarget.style.background = '#2563EB'
-  }}
-              onClick={() =>
-                asignarCaso(caso.id_caso)
-              }
-            >
-              Asignar
-            </button>
-
-          </div>
-
-        </div>
-
-      )}
-
-    </div>
-
-    <button
-      style={btnPrimary}
-      onClick={() =>
-        verSeguimiento(caso.id_caso)
-      }
-    >
-      Ver seguimiento
-    </button>
-    <button
-  style={btnPrimary}
-  onClick={() =>
-    descargarPDF(caso.id_caso)
-  }
->
-  Generar PDF
-</button>
-  </div>
-
-))}
       {mostrarModal && (
 
   <div style={overlay}>
@@ -781,55 +524,9 @@ const agregarComentario = async () => {
         gap: '18px'
       }}>
 
-        {seguimiento.map((item) => (
-
-          <div
-            key={item.id_seguimiento}
-            style={seguimientoCard}
-          >
-
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-
-              <strong style={{
-                color: '#0F172A'
-              }}>
-                {item.nombre}
-              </strong>
-
-              <span style={{
-                color: getColor(item.nombre_accion),
-                fontWeight: '600',
-                fontSize: '14px'
-              }}>
-                {item.nombre_accion}
-              </span>
-
-            </div>
-
-            <p style={{
-              marginTop: '12px',
-              color: '#334155',
-              lineHeight: '1.5'
-            }}>
-              {item.descripcion}
-            </p>
-
-            <small style={{
-              color: '#64748B'
-            }}>
-              {new Date(item.fecha_registro).toLocaleString()}
-            </small>
-
-          </div>
-
-        ))}
-
-
-
+        <TimelineSeguimiento
+  seguimiento={seguimiento}
+/>
 
       </div>
 
@@ -882,6 +579,7 @@ const agregarComentario = async () => {
         }
         placeholder="Ingrese observación..."
         style={textareaComentario}
+        
       />
 
       <button
@@ -895,10 +593,33 @@ const agregarComentario = async () => {
       </button>
 
     </div>
+    
 
   </div>
 
 )}
+<ModalSeguimiento
+  abierto={modalSeguimiento}
+  cerrar={() => setModalSeguimiento(false)}
+  seguimiento={seguimiento}
+  caso={casoModal}
+/>
+
+<Toast
+  visible={toast.visible}
+  mensaje={toast.mensaje}
+  tipo={toast.tipo}
+/>
+<ModalGestionCaso
+  abierto={modalGestion}
+  cerrar={() => setModalGestion(false)}
+  caso={casoGestion}
+  actualizarEstado={actualizarEstado}
+  reasignarCaso={asignarCaso}
+  agregarComentario={agregarComentario}
+  usuarios={usuarios}
+  estados={estados}
+/>
     </div>
   )
 }
@@ -917,12 +638,16 @@ const selectModern = {
   transition: '0.2s ease',
   boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
 }
-const cardHeader = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
-  marginBottom: '30px',
-  gap: '20px'
+
+const cardsGrid = {
+  display: 'grid',
+
+  gridTemplateColumns:
+    'repeat(auto-fit, minmax(420px, 1fr))',
+
+  gap: '24px',
+
+  alignItems: 'start'
 }
 
 const btnComentario = {
@@ -936,25 +661,6 @@ const btnComentario = {
   cursor: 'pointer'
 }
 
-const radicadoStyle = {
-  margin: 0,
-  fontSize: '24px',
-  color: '#0F172A'
-}
-
-const descripcionStyle = {
-  marginTop: '10px',
-  color: '#64748B',
-  lineHeight: '1.6',
-  maxWidth: '700px'
-}
-
-const badgesContainer = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '10px',
-  alignItems: 'flex-end'
-}
 
 const badge = {
   padding: '8px 14px',
@@ -963,11 +669,6 @@ const badge = {
   fontWeight: '600'
 }
 
-const accionesGrid = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-  gap: '20px'
-}
 
 const accionBox = {
   background: '#F8FAFC',
@@ -1022,24 +723,6 @@ const btnSecondary = {
   cursor: 'pointer',
   fontWeight: '600',
   transition: '0.2s ease'
-}
-
-const actionsContainer = {
-  display: 'flex',
-  gap: '12px',
-  flexWrap: 'wrap',
-  marginTop: '20px',
-  alignItems: 'center'
-}
-const cardStyle = {
-  background: '#ffffff',
-  padding: '28px',
-  marginBottom: '24px',
-  borderRadius: '20px',
-  border: '1px solid #E2E8F0',
-  boxShadow: '0 4px 14px rgba(0,0,0,0.04)',
-  transition: '0.25s ease',
-  cursor: 'default'
 }
 
 const filtrosContainer = {

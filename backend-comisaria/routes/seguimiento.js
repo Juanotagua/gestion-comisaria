@@ -1,9 +1,14 @@
 const router = require('express').Router()
 const db = require('../db/conexion')
 
-// 🔥 GET seguimiento por caso
+/* =========================
+   🔥 GET SEGUIMIENTO POR CASO
+========================= */
+
 router.get('/:idCaso', async (req, res) => {
+
   try {
+
     const { idCaso } = req.params
 
     const result = await db.query(`
@@ -13,35 +18,52 @@ router.get('/:idCaso', async (req, res) => {
         s.fecha_registro,
         u.nombre,
         a.nombre_accion
+
       FROM seguimiento s
-      LEFT JOIN usuarios u ON s.id_usuario = u.id_usuario
-      LEFT JOIN catalogo_acciones a ON s.id_accion = a.id_accion
+
+      LEFT JOIN usuarios u
+        ON s.id_usuario = u.id_usuario
+
+      LEFT JOIN catalogo_acciones a
+        ON s.id_accion = a.id_accion
+
       WHERE s.id_caso = $1
+
       ORDER BY s.fecha_registro DESC
     `, [idCaso])
 
     res.json(result.rows)
 
   } catch (error) {
-    console.error("🔥 ERROR REAL:", error)
-    res.status(500).json({ error: error.message })
+
+    console.error('🔥 ERROR REAL:', error)
+
+    res.status(500).json({
+      error: error.message
+    })
+
   }
+
 })
+
 /* =========================
-   CREAR COMENTARIO
+   🔥 CREAR COMENTARIO
 ========================= */
 
 router.post('/', async (req, res) => {
 
   try {
 
-   const {
-  id_caso,
-  id_usuario,
-  id_accion,
-  descripcion
-} = req.body
+    const {
+      id_caso,
+      id_usuario,
+      descripcion
+    } = req.body
 
+    // 🔥 ACCIÓN: COMENTARIO
+    const id_accion = 4
+
+    // 🔐 VALIDACIONES
     if (
       !id_caso ||
       !id_usuario ||
@@ -54,8 +76,7 @@ router.post('/', async (req, res) => {
 
     }
 
-    // 🔥 ACCIÓN COMENTARIO
-
+    // 🔥 INSERTAR SEGUIMIENTO
     const result = await db.query(`
 
       INSERT INTO seguimiento(
@@ -94,7 +115,7 @@ router.post('/', async (req, res) => {
 
     res.status(500).json({
       error: 'Error agregando comentario'
-    }) 
+    })
 
   }
 

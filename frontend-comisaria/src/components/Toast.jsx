@@ -1,34 +1,76 @@
-function Toast({ message, type }) {
+function Toast({
+  mensaje,
+  tipo = 'success',
+  visible
+}) {
 
-  if (!message) return null
+  if (!visible) return null
 
   return (
 
     <div
       style={{
-        position: 'fixed',
-        top: '25px',
-        right: '25px',
-        padding: '16px 20px',
-        borderRadius: '14px',
-        color: 'white',
-        fontWeight: '600',
-        zIndex: 9999,
-        minWidth: '280px',
-        boxShadow: '0 12px 24px rgba(0,0,0,0.15)',
+        ...toast,
         background:
-          type === 'error'
+          tipo === 'success'
+            ? '#16A34A'
+            : tipo === 'error'
             ? '#DC2626'
-            : type === 'info'
-            ? '#2563EB'
-            : '#16A34A'
+            : '#0F172A'
       }}
     >
-      {message}
+
+      <span style={icon}>
+        {
+          tipo === 'success'
+            ? '✓'
+            : tipo === 'error'
+            ? '✕'
+            : '!'
+        }
+      </span>
+
+      <span>
+        {mensaje}
+      </span>
+
     </div>
 
   )
 
+}
+
+/* ESTILOS */
+
+const toast = {
+  position: 'fixed',
+  top: '24px',
+  right: '24px',
+
+  minWidth: '280px',
+
+  padding: '16px 20px',
+
+  borderRadius: '16px',
+
+  color: '#FFFFFF',
+
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+
+  fontWeight: '600',
+
+  zIndex: 999999,
+
+  boxShadow: '0 20px 40px rgba(0,0,0,0.18)',
+
+  animation: 'fadeIn 0.25s ease'
+}
+
+const icon = {
+  fontSize: '18px',
+  fontWeight: '800'
 }
 
 export default Toast

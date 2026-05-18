@@ -541,7 +541,6 @@ router.put('/:id/reasignar', async (req, res) => {
 
 })
 
-
 /* ==============================
     ACTUALIZAR ESTADO
 ============================== */
@@ -616,10 +615,7 @@ router.put('/:id/estado', async (req, res) => {
       Number(id)
     ])
 
-    // =========================================
     // 🔥 SEGUIMIENTO AUTOMÁTICO
-    // =========================================
-
     await pool.query(`
 
       INSERT INTO seguimiento(

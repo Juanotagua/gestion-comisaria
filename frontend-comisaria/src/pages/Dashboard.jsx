@@ -13,16 +13,16 @@ function Reportes() {
 
       try {
 
-        const r1 = await fetch('http://localhost:3000/api/dashboard/resumen')
+        const r1 = await fetch('${import.meta.env.VITE_API_URL}/api/dashboard/resumen')
         setResumen(await r1.json())
 
-        const r2 = await fetch('http://localhost:3000/api/dashboard/por-prioridad')
+        const r2 = await fetch('${import.meta.env.VITE_API_URL}/api/dashboard/por-prioridad')
         setPrioridades(await r2.json())
 
-        const r3 = await fetch('http://localhost:3000/api/dashboard/por-estado')
+        const r3 = await fetch('${import.meta.env.VITE_API_URL}/api/dashboard/por-estado')
         setEstados(await r3.json())
 
-        const r4 = await fetch('http://localhost:3000/api/dashboard/top-usuarios')
+        const r4 = await fetch('${import.meta.env.VITE_API_URL}/api/dashboard/top-usuarios')
         setTopUsuarios(await r4.json())
 
       } catch (err) {
