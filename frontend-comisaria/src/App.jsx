@@ -6,6 +6,7 @@ import Layout from './components/Layout'
 import CrearCaso from './pages/CrearCaso'
 import Usuarios from './pages/Usuarios'
 import Reportes from './pages/Reportes'
+import ForgotPassword from './pages/ForgotPassword'
 
 function App() {
   return (
@@ -44,6 +45,12 @@ function App() {
             <CrearCaso />
           </Layout>
         } />
+        
+        <Route
+         path="/forgot-password"
+         element={<ForgotPassword />
+         }
+        />
 
       </Routes>
     </BrowserRouter>

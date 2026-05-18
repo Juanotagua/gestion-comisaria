@@ -200,6 +200,23 @@ function Login() {
           >
             Ingresar
           </button>
+          <p
+  style={{
+    marginTop: '18px',
+    textAlign: 'center',
+    cursor: 'pointer',
+    color: '#8B1E2D',
+    fontWeight: '600'
+  }}
+
+  onClick={() =>
+    navigate('/forgot-password')
+  }
+>
+
+  ¿Olvidaste tu contraseña?
+
+</p>
 
           {/* ERROR */}
           {error && (
