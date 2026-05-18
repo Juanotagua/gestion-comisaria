@@ -172,15 +172,14 @@ const sidebar = {
   padding: '28px 20px',
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'space-between',
   boxSizing: 'border-box',
-  borderRight: '1px solid rgba(255,255,255,0.06)',
+  borderRight:'1px solid rgba(255,255,255,0.06)',
   position: 'fixed',
-left: 0,
-top: 0,
-zIndex: 999,
-transition: '0.3s ease',
-  
+  left: 0,
+  top: 0,
+  zIndex: 999,
+  transition: '0.3s ease',
+  overflowY: 'auto'
 }
 
 const logoContainer = {
@@ -239,7 +238,7 @@ const activeItem = {
 }
 
 const footer = {
-  marginTop: 'auto'
+  marginTop: '40px'
 }
 
 const footerLine = {
