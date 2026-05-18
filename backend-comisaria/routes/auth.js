@@ -144,7 +144,8 @@ router.post(
       const link =
 `${process.env.FRONTEND_URL}/reset-password/${token}`
 
-      await resend.emails.send({
+      const data =
+  await resend.emails.send({
 
         from:
           'Comisaría <onboarding@resend.dev>',
@@ -197,6 +198,8 @@ router.post(
         `
 
       })
+      console.log(' RESPUESTA RESEND:')
+console.log(data)
 
       res.json({
         mensaje:
