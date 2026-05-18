@@ -6,6 +6,9 @@ function Layout({ children }) {
     localStorage.getItem('usuario')
   )
 
+  const isMobile =
+    window.innerWidth <= 768
+
   return (
 
     <div style={container}>
@@ -14,7 +17,12 @@ function Layout({ children }) {
       <Sidebar />
 
       {/* CONTENIDO */}
-      <div style={content}>
+      <div style={{
+        ...content,
+        marginLeft: isMobile
+          ? '0px'
+          : '270px'
+      }}>
 
         {/* HEADER */}
         <header style={header}>
@@ -27,7 +35,7 @@ function Layout({ children }) {
             </h2>
 
             <p style={subtitle}>
-              Comisaría de Familia
+              Plataforma institucional · Comisaría de Familia
             </p>
 
           </div>
@@ -37,19 +45,29 @@ function Layout({ children }) {
             style={userBox}
 
             onMouseEnter={(e) => {
+
               e.currentTarget.style.transform =
-                'translateY(-1px)'
+                'translateY(-2px)'
 
               e.currentTarget.style.boxShadow =
-                '0 8px 20px rgba(0,0,0,0.06)'
+                '0 12px 28px rgba(15,23,42,0.10)'
+
+              e.currentTarget.style.border =
+                '1px solid rgba(59,130,246,0.15)'
+
             }}
 
             onMouseLeave={(e) => {
+
               e.currentTarget.style.transform =
                 'translateY(0px)'
 
               e.currentTarget.style.boxShadow =
                 'none'
+
+              e.currentTarget.style.border =
+                '1px solid #E2E8F0'
+
             }}
           >
 
@@ -88,92 +106,132 @@ function Layout({ children }) {
 
 }
 
-/* ESTILOS */
+/* =========================
+   ESTILOS
+========================= */
 
 const container = {
   display: 'flex',
   minHeight: '100vh',
-  background: '#F8FAFC'
+  background:
+    'linear-gradient(to bottom right, #F8FAFC, #EEF2FF)'
 }
 
 const content = {
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  overflow: 'hidden'
+  overflow: 'hidden',
+  transition: '0.3s ease'
 }
 
 const header = {
-  minHeight: '82px',
-  background: 'rgba(255,255,255,0.92)',
-  backdropFilter: 'blur(10px)',
-  borderBottom: '1px solid #E2E8F0',
+  minHeight: '86px',
+
+  background:
+    'rgba(255,255,255,0.75)',
+
+  backdropFilter: 'blur(16px)',
+
+  borderBottom:
+    '1px solid rgba(226,232,240,0.8)',
+
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+
   padding: '0 34px',
+
   position: 'sticky',
   top: 0,
-  zIndex: 50
+  zIndex: 50,
+
+  boxShadow:
+    '0 2px 12px rgba(15,23,42,0.03)'
 }
 
 const title = {
-  fontSize: '24px',
-  fontWeight: '700',
+  fontSize: '28px',
+  fontWeight: '800',
   color: '#0F172A',
   margin: 0,
-  letterSpacing: '-0.3px'
+  letterSpacing: '-0.6px'
 }
 
 const subtitle = {
   fontSize: '13px',
   color: '#64748B',
-  marginTop: '6px'
+  marginTop: '8px',
+  letterSpacing: '0.2px'
 }
 
 const userBox = {
   display: 'flex',
   alignItems: 'center',
   gap: '14px',
-  background: '#FFFFFF',
-  padding: '10px 16px',
-  borderRadius: '16px',
-  border: '1px solid #E2E8F0',
-  transition: '0.2s ease',
+
+  background:
+    'rgba(255,255,255,0.92)',
+
+  padding: '12px 18px',
+
+  borderRadius: '18px',
+
+  border:
+    '1px solid #E2E8F0',
+
+  transition: '0.25s ease',
+
   cursor: 'default'
 }
 
 const avatar = {
-  width: '46px',
-  height: '46px',
+  width: '50px',
+  height: '50px',
+
   borderRadius: '50%',
-  background: 'linear-gradient(135deg, #0F172A, #1E293B)',
+
+  background:
+    'linear-gradient(135deg, #0F172A, #334155)',
+
   color: 'white',
+
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+
   fontWeight: '700',
-  fontSize: '17px',
-  boxShadow: '0 6px 14px rgba(15,23,42,0.18)'
+  fontSize: '18px',
+
+  boxShadow:
+    '0 10px 24px rgba(15,23,42,0.20)'
 }
 
 const userName = {
-  fontWeight: '600',
+  fontWeight: '700',
   color: '#0F172A',
-  fontSize: '14px'
+  fontSize: '14px',
+  letterSpacing: '0.2px'
 }
 
 const userRole = {
   fontSize: '12px',
   color: '#64748B',
-  marginTop: '3px',
+  marginTop: '4px',
   textTransform: 'capitalize'
 }
 
 const main = {
   flex: 1,
-  padding: '34px',
-  overflowY: 'auto'
+
+  padding:
+    window.innerWidth <= 768
+      ? '20px'
+      : '34px',
+
+  overflowY: 'auto',
+
+  transition: '0.3s ease'
 }
 
 export default Layout

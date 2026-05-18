@@ -1,6 +1,9 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 
-function Sidebar() {
+function Sidebar({
+  mobileOpen,
+  setMobileOpen
+}) {
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -26,7 +29,26 @@ function Sidebar() {
 
   return (
 
-    <div style={sidebar}>
+  <>
+
+    {mobileOpen && (
+      <div
+        onClick={() => setMobileOpen(false)}
+        style={overlay}
+      />
+    )}
+
+    <div
+      style={{
+        ...sidebar,
+        transform:
+          window.innerWidth <= 768
+            ? mobileOpen
+              ? 'translateX(0)'
+              : 'translateX(-100%)'
+            : 'translateX(0)'
+      }}
+    >
 
       {/* TOP */}
       <div>
@@ -135,7 +157,7 @@ function Sidebar() {
       </div>
 
     </div>
-
+</>
   )
 
 }
@@ -152,7 +174,13 @@ const sidebar = {
   flexDirection: 'column',
   justifyContent: 'space-between',
   boxSizing: 'border-box',
-  borderRight: '1px solid rgba(255,255,255,0.06)'
+  borderRight: '1px solid rgba(255,255,255,0.06)',
+  position: 'fixed',
+left: 0,
+top: 0,
+zIndex: 999,
+transition: '0.3s ease',
+  
 }
 
 const logoContainer = {
@@ -232,6 +260,15 @@ const logoutButton = {
   fontWeight: '600',
   cursor: 'pointer',
   transition: '0.2s ease'
+}
+const overlay = {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  background: 'rgba(0,0,0,0.5)',
+  zIndex: 998
 }
 
 export default Sidebar
