@@ -2,7 +2,16 @@ const router = require('express').Router()
 const pool = require('../db/conexion')
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
-const nodemailer = require('nodemailer')
+
+const { Resend } = require('resend')
+
+const resend = new Resend(
+  process.env.RESEND_API_KEY
+)
+
+/* =========================
+   LOGIN
+========================= */
 
 router.post('/login', async (req, res) => {
 
@@ -36,17 +45,12 @@ router.post('/login', async (req, res) => {
     }
 
     const usuario = resultado.rows[0]
-console.log(password)
-console.log(usuario.password_hash)
 
-const passwordCorrecta =
-  await bcrypt.compare(
-    password,
-    usuario.password_hash
-  )
-
-console.log(passwordCorrecta)
-   
+    const passwordCorrecta =
+      await bcrypt.compare(
+        password,
+        usuario.password_hash
+      )
 
     if (!passwordCorrecta) {
 
@@ -56,7 +60,6 @@ console.log(passwordCorrecta)
 
     }
 
-    // 🔥 NO ENVIAR HASH
     delete usuario.password_hash
 
     res.json({
@@ -78,21 +81,6 @@ console.log(passwordCorrecta)
   }
 
 })
-/* =========================
-   EMAIL
-========================= */
-
-const transporter = nodemailer.createTransport({
-
-  service: 'gmail',
-
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-
-})
-
 
 /* =========================
    FORGOT PASSWORD
@@ -100,6 +88,7 @@ const transporter = nodemailer.createTransport({
 
 router.post(
   '/forgot-password',
+
   async (req, res) => {
 
     try {
@@ -124,34 +113,41 @@ router.post(
 
       }
 
+      const usuario =
+        resultado.rows[0]
+
       const token = crypto
         .randomBytes(32)
         .toString('hex')
 
       const expiracion =
         new Date(
-          Date.now() + 3600000
+          Date.now() + 1000 * 60 * 30
         )
 
       await pool.query(`
+
         UPDATE usuarios
+
         SET
           reset_token = $1,
           reset_token_expira = $2
-        WHERE correo = $3
+
+        WHERE id_usuario = $3
+
       `, [
         token,
         expiracion,
-        correo
+        usuario.id_usuario
       ])
 
       const link =
-`http://localhost:5173/reset-password/${token}`
+`${process.env.FRONTEND_URL}/reset-password/${token}`
 
-      await transporter.sendMail({
+      await resend.emails.send({
 
         from:
-          process.env.EMAIL_USER,
+          'Comisaría <onboarding@resend.dev>',
 
         to: correo,
 
@@ -159,17 +155,45 @@ router.post(
           'Recuperación de contraseña',
 
         html: `
-          <h2>
-            Recuperación de contraseña
-          </h2>
 
-          <p>
-            Haz clic en el enlace:
-          </p>
+          <div style="
+            font-family: Arial;
+            padding: 30px;
+          ">
 
-          <a href="${link}">
-            Restablecer contraseña
-          </a>
+            <h2>
+              Recuperación de contraseña
+            </h2>
+
+            <p>
+              Haz clic en el botón:
+            </p>
+
+            <a
+              href="${link}"
+
+              style="
+                background:#8B1E2D;
+                color:white;
+                padding:14px 22px;
+                border-radius:10px;
+                text-decoration:none;
+                display:inline-block;
+                margin-top:15px;
+              "
+            >
+              Restablecer contraseña
+            </a>
+
+            <p style="
+              margin-top:25px;
+              color:#64748B;
+            ">
+              Este enlace expira en 30 minutos.
+            </p>
+
+          </div>
+
         `
 
       })
