@@ -98,5 +98,45 @@ router.get('/top-usuarios', async (req, res) => {
     res.status(500).json({ error: 'Error top usuarios' })
   }
 })
+// 🔹 ACTIVIDAD RECIENTE
+router.get('/actividad-reciente', async (req, res) => {
+
+  try {
+
+    const result = await pool.query(`
+
+      SELECT
+        s.id_seguimiento,
+        s.descripcion,
+        s.fecha_registro,
+        c.numero_radicado,
+        u.nombre
+      FROM seguimiento s
+
+      JOIN casos c
+        ON s.id_caso = c.id_caso
+
+      LEFT JOIN usuarios u
+        ON s.id_usuario = u.id_usuario
+
+      ORDER BY s.fecha_registro DESC
+
+      LIMIT 8
+
+    `)
+
+    res.json(result.rows)
+
+  } catch (error) {
+
+    console.log(error)
+
+    res.status(500).json({
+      error: 'Error actividad reciente'
+    })
+
+  }
+
+})
 
 module.exports = router

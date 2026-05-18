@@ -124,13 +124,11 @@ function CasoCard({
       <div style={actions}>
 
         <button
-          style={primaryButton}
-          onClick={() =>
-            verSeguimiento(caso.id_caso)
-          }
-        >
-          Ver seguimiento
-        </button>
+  style={primaryButton}
+  onClick={() => verSeguimiento(caso)}
+>
+  Ver seguimiento
+</button>
 
         <button
           style={secondaryButton}

@@ -137,8 +137,10 @@ function Casos() {
 
     console.error(error)
 
-    mostrarToast('Error obteniendo seguimiento', 'error')
-
+    mostrarToast(
+      'Error obteniendo seguimiento',
+      'error'
+    )
 
   }
 

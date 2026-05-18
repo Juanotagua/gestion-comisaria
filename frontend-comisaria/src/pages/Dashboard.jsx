@@ -1,249 +1,359 @@
 import { useEffect, useState } from 'react'
-import Toast from '../components/Toast'
-function Reportes() {
+
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid
+} from 'recharts'
+
+import StatsCard from '../components/StatsCard'
+import LoadingSpinner from '../components/LoadingSpinner'
+import EmptyState from '../components/EmptyState'
+
+function Dashboard() {
 
   const [resumen, setResumen] = useState(null)
-  const [prioridades, setPrioridades] = useState([])
-  const [estados, setEstados] = useState([])
-  const [topUsuarios, setTopUsuarios] = useState([])
+
+  const [prioridades, setPrioridades] =
+    useState([])
+
+  const [estados, setEstados] =
+    useState([])
+
+  const [topUsuarios, setTopUsuarios] =
+    useState([])
+
+    const [actividad, setActividad] =
+  useState([])
+
+  const [loading, setLoading] =
+    useState(true)
 
   useEffect(() => {
 
-    const cargar = async () => {
-
-      try {
-
-        const r1 = await fetch('${import.meta.env.VITE_API_URL}/api/dashboard/resumen')
-        setResumen(await r1.json())
-
-        const r2 = await fetch('${import.meta.env.VITE_API_URL}/api/dashboard/por-prioridad')
-        setPrioridades(await r2.json())
-
-        const r3 = await fetch('${import.meta.env.VITE_API_URL}/api/dashboard/por-estado')
-        setEstados(await r3.json())
-
-        const r4 = await fetch('${import.meta.env.VITE_API_URL}/api/dashboard/top-usuarios')
-        setTopUsuarios(await r4.json())
-
-      } catch (err) {
-        console.error(err)
-      }
-
-    }
-
-    cargar()
+    cargarDashboard()
 
   }, [])
 
+  const cargarDashboard = async () => {
+
+    try {
+
+      const r1 = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/dashboard/resumen`
+      )
+
+      const data1 = await r1.json()
+
+      setResumen(data1)
+
+      const r2 = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/dashboard/por-prioridad`
+      )
+
+      const data2 = await r2.json()
+
+      setPrioridades(data2)
+
+      const r3 = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/dashboard/por-estado`
+      )
+
+      const data3 = await r3.json()
+
+      setEstados(data3)
+
+      const r4 = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/dashboard/top-usuarios`
+      )
+
+      const data4 = await r4.json()
+
+      setTopUsuarios(data4)
+      const r5 = await fetch(
+  `${import.meta.env.VITE_API_URL}/api/dashboard/actividad-reciente`
+)
+
+const data5 = await r5.json()
+
+setActividad(data5)
+
+    } catch (error) {
+
+      console.log(error)
+
+    } finally {
+
+      setLoading(false)
+
+    }
+    
+
+  }
+
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
   if (!resumen) {
     return (
-      <div style={loadingContainer}>
-        <div style={loadingCard}>
-          Cargando estadísticas...
-        </div>
-      </div>
+      <EmptyState
+        mensaje="No hay estadísticas disponibles"
+      />
     )
   }
+
+  const COLORS = [
+    '#8B1E2D',
+    '#2563EB',
+    '#16A34A',
+    '#EA580C',
+    '#7C3AED'
+  ]
 
   return (
 
     <div style={container}>
 
       {/* HEADER */}
+
       <div style={header}>
 
         <div>
+
           <h1 style={title}>
-            Dashboard
+            Dashboard General
           </h1>
 
           <p style={subtitle}>
             Estadísticas generales del sistema
           </p>
+
         </div>
 
       </div>
 
-      {/* TARJETAS */}
-      <div style={grid}>
+      {/* STATS */}
 
-        <Card
-          title="Casos activos"
-          value={resumen.casos_activos}
+      <div style={statsGrid}>
+
+        <StatsCard
+          titulo="Casos activos"
+          valor={resumen.casos_activos}
+          color="#8B1E2D"
+          icono="📂"
+        />
+
+        <StatsCard
+          titulo="Prioridad alta"
+          valor={resumen.prioridad_alta}
+          color="#EA580C"
+          icono="⚠️"
+        />
+
+        <StatsCard
+          titulo="Funcionarios"
+          valor={resumen.funcionarios}
           color="#2563EB"
-        />
-
-        <Card
-          title="Prioridad alta"
-          value={resumen.prioridad_alta}
-          color="#DC2626"
-        />
-
-        <Card
-          title="Funcionarios"
-          value={resumen.funcionarios}
-          color="#7C3AED"
+          icono="👮"
         />
 
       </div>
 
-      {/* PRIORIDAD */}
-      <Section title="Casos por prioridad">
+      {/* CHARTS */}
 
-        {prioridades.map((p) => (
+      <div style={chartsGrid}>
 
-          <Bar
-            key={p.nombre_prioridad}
-            label={p.nombre_prioridad}
-            value={p.total}
-            color={getColorPrioridad(p.nombre_prioridad)}
-          />
+        {/* PRIORIDADES */}
 
-        ))}
+        <div style={card}>
 
-      </Section>
+          <h2 style={cardTitle}>
+            Casos por prioridad
+          </h2>
 
-      {/* ESTADOS */}
-      <Section title="Casos por estado">
+          <ResponsiveContainer
+            width="100%"
+            height={320}
+          >
 
-        {estados.map((e) => (
+            <PieChart>
 
-          <Bar
-            key={e.nombre_estado}
-            label={e.nombre_estado}
-            value={e.total}
-            color="#2563EB"
-          />
+              <Pie
+                data={prioridades}
+                dataKey="total"
+                nameKey="nombre_prioridad"
+                outerRadius={120}
+              >
 
-        ))}
+                {prioridades.map((_, index) => (
 
-      </Section>
+                  <Cell
+                    key={index}
+                    fill={
+                      COLORS[
+                        index % COLORS.length
+                      ]
+                    }
+                  />
+
+                ))}
+
+              </Pie>
+
+              <Tooltip />
+
+            </PieChart>
+
+          </ResponsiveContainer>
+
+        </div>
+
+        {/* ESTADOS */}
+
+        <div style={card}>
+
+          <h2 style={cardTitle}>
+            Casos por estado
+          </h2>
+
+          <ResponsiveContainer
+            width="100%"
+            height={320}
+          >
+
+            <BarChart data={estados}>
+
+              <CartesianGrid strokeDasharray="3 3" />
+
+              <XAxis dataKey="nombre_estado" />
+
+              <YAxis />
+
+              <Tooltip />
+
+              <Bar
+                dataKey="total"
+                fill="#8B1E2D"
+                radius={[10, 10, 0, 0]}
+              />
+
+            </BarChart>
+
+          </ResponsiveContainer>
+
+        </div>
+
+      </div>
 
       {/* TOP USUARIOS */}
-      <Section title="Funcionarios con más casos">
 
-        {topUsuarios.map((u) => (
+      <div style={card}>
 
-          <Bar
-            key={u.nombre}
-            label={u.nombre}
-            value={u.total}
-            color="#7C3AED"
-          />
+        <h2 style={cardTitle}>
+          Funcionarios con más casos
+        </h2>
+
+        <ResponsiveContainer
+          width="100%"
+          height={350}
+        >
+
+          <BarChart data={topUsuarios}>
+
+            <CartesianGrid strokeDasharray="3 3" />
+
+            <XAxis dataKey="nombre" />
+
+            <YAxis />
+
+            <Tooltip />
+
+            <Bar
+              dataKey="total"
+              fill="#2563EB"
+              radius={[10, 10, 0, 0]}
+            />
+
+          </BarChart>
+
+        </ResponsiveContainer>
+
+      </div>
+
+      {/* ACTIVIDAD RECIENTE */}
+
+      <div style={card}>
+
+  <div style={tableHeader}>
+
+    <h2 style={cardTitle}>
+      Actividad reciente
+    </h2>
+
+  </div>
+
+  <div style={tableContainer}>
+
+    <table style={table}>
+
+      <thead>
+
+        <tr>
+
+          <th style={th}>Usuario</th>
+
+          <th style={th}>Acción</th>
+
+          <th style={th}>Caso</th>
+
+          <th style={th}>Fecha</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {Array.isArray(actividad) && actividad.map((item) => (
+
+          <tr key={item.id_seguimiento}>
+
+            <td style={td}>
+              {item.nombre || 'Funcionario'}
+            </td>
+
+            <td style={td}>
+              {item.descripcion}
+            </td>
+
+            <td style={td}>
+              {item.numero_radicado}
+            </td>
+
+            <td style={td}>
+              {
+                new Date(item.fecha_registro)
+                .toLocaleDateString()
+              }
+            </td>
+
+          </tr>
 
         ))}
 
-      </Section>
+      </tbody>
 
-    </div>
+    </table>
 
-  )
-
-}
-
-/* COMPONENTES */
-
-function Card({ title, value, color }) {
-
-  return (
-
-    <div
-      style={card}
-
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform =
-          'translateY(-4px)'
-
-        e.currentTarget.style.boxShadow =
-          '0 16px 30px rgba(0,0,0,0.08)'
-      }}
-
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform =
-          'translateY(0px)'
-
-        e.currentTarget.style.boxShadow =
-          '0 6px 18px rgba(0,0,0,0.05)'
-      }}
-    >
-
-      <div
-        style={{
-          ...circle,
-          background: color
-        }}
-      />
-
-      <h3 style={cardTitle}>
-        {title}
-      </h3>
-
-      <p
-        style={{
-          ...number,
-          color
-        }}
-      >
-        {value}
-      </p>
-
-    </div>
-
-  )
-
-}
-
-function Section({ title, children }) {
-
-  return (
-
-    <div style={section}>
-
-      <div style={sectionHeader}>
-        <h2 style={sectionTitle}>
-          {title}
-        </h2>
-      </div>
-
-      <div style={sectionContent}>
-        {children}
-      </div>
-
-    </div>
-
-  )
-
-}
-
-function Bar({ label, value, color }) {
-
-  const width = value * 35
-
-  return (
-
-    <div style={barContainer}>
-
-      <div style={barTop}>
-
-        <span style={barLabel}>
-          {label}
-        </span>
-
-        <span style={barValue}>
-          {value}
-        </span>
-
-      </div>
-
-      <div style={barBg}>
-
-        <div
-          style={{
-            ...barFill,
-            width: `${width}px`,
-            background: color
-          }}
-        />
+  </div>
 
       </div>
 
@@ -256,20 +366,9 @@ function Bar({ label, value, color }) {
 /* ESTILOS */
 
 const container = {
-  padding: '35px',
-  background: '#F8FAFC',
+  padding: '28px',
+  background: '#F1F5F9',
   minHeight: '100vh'
-}
-
-const loadingContainer = {
-  padding: '40px'
-}
-
-const loadingCard = {
-  background: 'white',
-  padding: '30px',
-  borderRadius: '18px',
-  border: '1px solid #E2E8F0'
 }
 
 const header = {
@@ -278,118 +377,71 @@ const header = {
 
 const title = {
   margin: 0,
-  fontSize: '38px',
+  fontSize: '42px',
   color: '#0F172A'
 }
 
 const subtitle = {
   marginTop: '10px',
   color: '#64748B',
-  fontSize: '15px'
+  fontSize: '17px'
 }
 
-const grid = {
+const statsGrid = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-  gap: '20px'
+  gridTemplateColumns:
+    'repeat(auto-fit, minmax(220px, 1fr))',
+  gap: '18px',
+  marginBottom: '24px'
+}
+
+const chartsGrid = {
+  display: 'grid',
+  gridTemplateColumns:
+    '1fr 1fr',
+  gap: '20px',
+  marginBottom: '24px'
 }
 
 const card = {
   background: '#FFFFFF',
   borderRadius: '22px',
-  padding: '28px',
+  padding: '20px',
   border: '1px solid #E2E8F0',
-  boxShadow: '0 6px 18px rgba(0,0,0,0.05)',
-  transition: '0.25s ease',
-  cursor: 'default'
-}
-
-const circle = {
-  width: '14px',
-  height: '14px',
-  borderRadius: '50%',
-  marginBottom: '18px'
+  boxShadow: '0 10px 30px rgba(15,23,42,0.06)'
 }
 
 const cardTitle = {
-  color: '#64748B',
-  fontSize: '15px',
-  fontWeight: '600'
+  marginBottom: '20px',
+  color: '#0F172A'
+}
+const tableHeader = {
+  marginBottom: '20px'
 }
 
-const number = {
-  fontSize: '42px',
-  fontWeight: '700',
-  marginTop: '12px',
-  marginBottom: 0
+const tableContainer = {
+  overflowX: 'auto'
 }
 
-const section = {
-  marginTop: '35px',
-  background: '#FFFFFF',
-  borderRadius: '22px',
-  border: '1px solid #E2E8F0',
-  overflow: 'hidden'
+const table = {
+  width: '100%',
+  borderCollapse: 'collapse'
 }
 
-const sectionHeader = {
-  padding: '22px 26px',
+const th = {
+  textAlign: 'left',
+  padding: '14px',
+  background: '#F8FAFC',
+  color: '#475569',
+  fontSize: '14px',
   borderBottom: '1px solid #E2E8F0'
 }
 
-const sectionTitle = {
-  margin: 0,
+const td = {
+  padding: '16px 14px',
+  borderBottom: '1px solid #E2E8F0',
   color: '#0F172A',
-  fontSize: '22px'
+  fontSize: '14px'
 }
 
-const sectionContent = {
-  padding: '26px'
-}
-
-const barContainer = {
-  marginBottom: '22px'
-}
-
-const barTop = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  marginBottom: '10px'
-}
-
-const barLabel = {
-  color: '#334155',
-  fontWeight: '600'
-}
-
-const barValue = {
-  color: '#64748B'
-}
-
-const barBg = {
-  width: '100%',
-  height: '12px',
-  background: '#E2E8F0',
-  borderRadius: '999px',
-  overflow: 'hidden'
-}
-
-const barFill = {
-  height: '12px',
-  borderRadius: '999px',
-  transition: '0.4s ease'
-}
-
-/* COLORES PRIORIDAD */
-
-const getColorPrioridad = (p) => {
-
-  if (p === 'Alta') return '#DC2626'
-  if (p === 'Media') return '#F59E0B'
-  if (p === 'Baja') return '#16A34A'
-
-  return '#2563EB'
-
-}
-
-export default Reportes
+export default Dashboard
