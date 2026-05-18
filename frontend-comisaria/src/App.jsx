@@ -7,6 +7,7 @@ import CrearCaso from './pages/CrearCaso'
 import Usuarios from './pages/Usuarios'
 import Reportes from './pages/Reportes'
 import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 
 function App() {
   return (
@@ -50,6 +51,10 @@ function App() {
          path="/forgot-password"
          element={<ForgotPassword />
          }
+        />
+        <Route
+        path="/reset-password/:token"
+        element={<ResetPassword />}
         />
 
       </Routes>
