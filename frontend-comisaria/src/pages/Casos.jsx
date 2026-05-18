@@ -599,6 +599,29 @@ const agregarComentario = async () => {
   <label style={labelStyle}>
     Comentarios
   </label>
+   {/* AGREGAR COMENTARIO */}
+<div style={accionBox}>
+
+  <label style={labelStyle}>
+    Comentarios
+  </label>
+
+  <div style={filaAccion}>
+
+    <button
+      style={btnSecondary}
+      onClick={() => {
+        setCasoSeleccionado(caso.id_caso)
+        setMostrarComentario(true)
+      }}
+    >
+      Agregar comentario
+    </button>
+
+  </div>
+  
+
+</div>
 
   <div style={filaAccion}>
 

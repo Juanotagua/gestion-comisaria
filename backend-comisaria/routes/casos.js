@@ -278,7 +278,7 @@ LEFT JOIN usuarios u
 })
 
 
-/* ==============================
+/* ============================== 
    🔹 CREAR CASO
 ============================== */
 router.post('/', async (req, res) => {
@@ -336,7 +336,7 @@ router.post('/', async (req, res) => {
 
     }
 
-    // 🔥 INSERT
+    // 🔥 INSERT CASO
     const result = await pool.query(`
       INSERT INTO casos(
         numero_radicado,
@@ -347,7 +347,11 @@ router.post('/', async (req, res) => {
         fecha_apertura,
         id_usuario_creador
       )
-      VALUES($1,$2,$3,$4,$5,$6,$7)
+
+      VALUES(
+        $1,$2,$3,$4,$5,$6,$7
+      )
+
       RETURNING *;
     `,
     [
@@ -360,9 +364,43 @@ router.post('/', async (req, res) => {
       id_usuario_creador
     ])
 
+    // 🔥 CASO CREADO
+    const nuevoCaso = result.rows[0]
+
+    // =========================================
+    // 🔥 SEGUIMIENTO AUTOMÁTICO
+    // =========================================
+
+    await pool.query(`
+
+      INSERT INTO seguimiento(
+        id_caso,
+        id_usuario,
+        id_accion,
+        descripcion,
+        fecha_registro
+      )
+
+      VALUES(
+        $1,
+        $2,
+        $3,
+        $4,
+        NOW()
+      )
+
+    `,
+    [
+      nuevoCaso.id_caso,
+      id_usuario_creador,
+      1,
+      'Caso creado automáticamente'
+    ])
+
+    // 🔥 RESPUESTA
     res.status(201).json({
       mensaje: 'Caso creado correctamente',
-      caso: result.rows[0]
+      caso: nuevoCaso
     })
 
   } catch (error) {
@@ -430,7 +468,20 @@ router.put('/:id/reasignar', async (req, res) => {
 
     }
 
-    //  UPDATE
+    // 🔥 OBTENER NOMBRE USUARIO
+    const usuarioAsignado = await pool.query(
+      `
+      SELECT nombre
+      FROM usuarios
+      WHERE id_usuario = $1
+      `,
+      [id_usuario_asignado]
+    )
+
+    const nombreUsuario =
+      usuarioAsignado.rows[0]?.nombre
+
+    // 🔥 UPDATE
     const result = await pool.query(`
       UPDATE casos
       SET id_usuario_asignado = $1
@@ -442,6 +493,37 @@ router.put('/:id/reasignar', async (req, res) => {
       id
     ])
 
+    // =========================================
+    //  SEGUIMIENTO AUTOMÁTICO
+    // =========================================
+
+    await pool.query(`
+
+      INSERT INTO seguimiento(
+        id_caso,
+        id_usuario,
+        id_accion,
+        descripcion,
+        fecha_registro
+      )
+
+      VALUES(
+        $1,
+        $2,
+        $3,
+        $4,
+        NOW()
+      )
+
+    `,
+    [
+      id,
+      id_usuario_asignado,
+      3,
+      `Caso reasignado a ${nombreUsuario}`
+    ])
+
+    // 🔥 RESPUESTA
     res.json({
       mensaje: 'Caso reasignado correctamente',
       caso: result.rows[0]
@@ -470,7 +552,7 @@ router.put('/:id/estado', async (req, res) => {
     const { id } = req.params
     const { id_estado } = req.body
 
-    //  VALIDACIÓN
+    // 🔐 VALIDACIÓN
     if (
       !id_estado ||
       isNaN(id_estado)
@@ -482,7 +564,7 @@ router.put('/:id/estado', async (req, res) => {
 
     }
 
-    //  VALIDAR ESTADO
+    // 🔍 VALIDAR ESTADO
     const estadoExiste = await pool.query(
       `
       SELECT *
@@ -500,7 +582,7 @@ router.put('/:id/estado', async (req, res) => {
 
     }
 
-    //  VALIDAR CASO
+    // 🔍 VALIDAR CASO
     const casoExiste = await pool.query(
       `
       SELECT *
@@ -518,7 +600,11 @@ router.put('/:id/estado', async (req, res) => {
 
     }
 
-    //  UPDATE
+    // 🔥 NOMBRE DEL ESTADO
+    const nombreEstado =
+      estadoExiste.rows[0].nombre_estado
+
+    // 🔥 UPDATE
     const result = await pool.query(`
       UPDATE casos
       SET id_estado = $1
@@ -530,6 +616,37 @@ router.put('/:id/estado', async (req, res) => {
       Number(id)
     ])
 
+    // =========================================
+    // 🔥 SEGUIMIENTO AUTOMÁTICO
+    // =========================================
+
+    await pool.query(`
+
+      INSERT INTO seguimiento(
+        id_caso,
+        id_usuario,
+        id_accion,
+        descripcion,
+        fecha_registro
+      )
+
+      VALUES(
+        $1,
+        $2,
+        $3,
+        $4,
+        NOW()
+      )
+
+    `,
+    [
+      id,
+      casoExiste.rows[0].id_usuario_creador,
+      2,
+      `Estado actualizado a "${nombreEstado}"`
+    ])
+
+    // 🔥 RESPUESTA
     res.json({
       mensaje: 'Estado actualizado correctamente',
       caso: result.rows[0]
@@ -537,7 +654,7 @@ router.put('/:id/estado', async (req, res) => {
 
   } catch (error) {
 
-    console.log(' ERROR COMPLETO:')
+    console.log('🔥 ERROR COMPLETO:')
     console.log(error)
 
     res.status(500).json({

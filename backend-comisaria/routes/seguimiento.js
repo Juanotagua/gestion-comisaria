@@ -35,11 +35,12 @@ router.post('/', async (req, res) => {
 
   try {
 
-    const {
-      id_caso,
-      id_usuario,
-      descripcion
-    } = req.body
+   const {
+  id_caso,
+  id_usuario,
+  id_accion,
+  descripcion
+} = req.body
 
     if (
       !id_caso ||
@@ -54,7 +55,6 @@ router.post('/', async (req, res) => {
     }
 
     // 🔥 ACCIÓN COMENTARIO
-    const id_accion = 4
 
     const result = await db.query(`
 
